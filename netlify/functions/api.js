@@ -1,4 +1,4 @@
-exports.handler = async (event) => {
+export default async (request) => {
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
@@ -6,33 +6,39 @@ exports.handler = async (event) => {
     "Content-Type": "application/json"
   };
 
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 204,
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
       headers
-    };
+    });
   }
 
   try {
-    const body = event.body ? JSON.parse(event.body) : {};
+    const body = request.body
+      ? await request.json()
+      : {};
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
+    return new Response(
+      JSON.stringify({
         ok: true,
         message: "KUZU API is working",
         action: body.action || null
-      })
-    };
+      }),
+      {
+        status: 200,
+        headers
+      }
+    );
   } catch (error) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({
+    return new Response(
+      JSON.stringify({
         ok: false,
         error: "Invalid request"
-      })
-    };
+      }),
+      {
+        status: 400,
+        headers
+      }
+    );
   }
 };
